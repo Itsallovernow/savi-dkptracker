@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  DKP Bid Tracker Backend - Serverless API for auction record ingestion,
+  deduplication, and retrieval. Enforces HTTPS, rate limiting, and API key auth.
+
+Globals:
+  Function:
+    Timeout: 60
+    MemorySize: 256
+    Runtime: python3.13
+
+Parameters:
+  ApiKeyValue:
+    Type: String
+    Description: Shared API key (bearer token) used by DKP clients to authenticate POST requests.
+    NoEcho: true
+
+  AdminApiKeyValue:
+    Type: String
+    Description: Admin API key (bearer token) for privileged operations like DELETE. Only the guild leader should have this.
+    NoEcho: true
+
+  StageName:
+    Type: String
+    Default: prod
+    Description: API Gateway deployment stage name.
+
+Resources:
+  # -------------------------------------------------------
+  # DynamoDB Table — Auction Records
+  # -------------------------------------------------------
+  AuctionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-auctions"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: dedup_key
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+        - AttributeName: raid_session_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: dedup_key
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: TimestampIndex
+          KeySchema:
+            - AttributeName: raid_session_id
+              KeyType: HASH
+            - AttributeName: timestamp
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      Tags:
+        - Key: Application
+          Value: DKPBidTracker
+
+  # -------------------------------------------------------
+  # Lambda Function — API Handler
+  # -------------------------------------------------------
+  AuctionsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-handler"
+      Handler: handler.lambda_handler
+      Runtime: python3.13
+      CodeUri: .
+      Description: Handles auction record ingestion, retrieval, and stats.
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref AuctionsTable
+          API_KEY: !Ref ApiKeyValue
+          ADMIN_API_KEY: !Ref AdminApiKeyValue
+          TIMESTAMP_INDEX: TimestampIndex
+          EXPORT_BUCKET: savi-dkp-viewer
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuctionsTable
+        - S3CrudPolicy:
+            BucketName: savi-dkp-viewer
+        - Statement:
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AWS::StackName}-handler"
+      Events:
+        PostAuctions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions
+            Method: POST
+        GetAuctions:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions
+            Method: GET
+        GetAuctionsExport:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions/export
+            Method: GET
+        GetAuctionsStats:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions/stats
+            Method: GET
+        DeleteAuction:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions/{dedup_key}
+            Method: DELETE
+        GetAuctionDetail:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /auctions/{dedup_key}
+            Method: GET
+        GetGuildCharacters:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /guild/characters
+            Method: GET
+
+  # -------------------------------------------------------
+  # API Gateway HTTP API — HTTPS enforced by default
+  # -------------------------------------------------------
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref StageName
+      Description: DKP Bid Tracker HTTP API (HTTPS only)
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        AllowHeaders:
+          - Content-Type
+          - Authorization
+        MaxAge: 3600
+      # Rate limiting: 100 requests/second per route, 200 burst
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 200
+        ThrottlingRateLimit: 100
+
+Outputs:
+  ApiEndpoint:
+    Description: URL of the DKP Bid Tracker API
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}"
+
+  AuctionsTableName:
+    Description: DynamoDB table name for auction records
+    Value: !Ref AuctionsTable
+
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt AuctionsFunction.Arn

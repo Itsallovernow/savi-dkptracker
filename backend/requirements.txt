@@ -1,0 +1,4 @@
+# Lambda dependencies for DKP Bid Tracker Backend
+# Pin versions for reproducibility
+
+boto3==1.35.99

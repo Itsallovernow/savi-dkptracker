@@ -1,0 +1,12 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "savi-bid-history"
+resolve_s3 = true
+s3_prefix = "savi-bid-history"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "StageName=\"prod\""
+image_repositories = []
+
+[default.global.parameters]
+region = "us-west-1"

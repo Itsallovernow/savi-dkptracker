@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DKP Auction History</title>
+    <link rel="icon" type="image/png" href="fav.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header role="banner">
+        <h1>&#9876; DKP Auction History</h1>
+        <p class="header-subtitle">Guild Auction Records</p>
+    </header>
+
+    <nav id="nav-bar" class="nav-bar" aria-label="Main navigation">
+        <ul class="nav-links">
+            <li><a href="#auctions" class="nav-link" data-view="auctions">Auctions</a></li>
+            <li><a href="#characters" class="nav-link" data-view="characters">Characters</a></li>
+        </ul>
+    </nav>
+
+    <main id="main-content" role="main">
+        <!-- Auction View (default view) -->
+        <section id="auction-view">
+            <!-- Controls bar: search, refresh, auto-refresh toggle -->
+            <section class="controls" aria-label="Table controls">
+                <div class="search-container">
+                    <label for="search-input">Search auctions</label>
+                    <input
+                        type="search"
+                        id="search-input"
+                        placeholder="Filter by item name or player name..."
+                        aria-describedby="search-help"
+                        autocomplete="off"
+                    >
+                    <span id="search-help" class="visually-hidden">
+                        Type to filter auction records by item name or player name. Results update as you type.
+                    </span>
+                </div>
+
+                <div class="date-filter-container">
+                    <div class="date-input-group">
+                        <label for="date-from">From</label>
+                        <input type="date" id="date-from" aria-label="Filter from date">
+                    </div>
+                    <div class="date-input-group">
+                        <label for="date-to">To</label>
+                        <input type="date" id="date-to" aria-label="Filter to date">
+                    </div>
+                    <button type="button" id="date-clear-btn" class="date-clear-btn" aria-label="Clear date filter">Clear</button>
+                </div>
+
+                <div class="refresh-controls">
+                    <button type="button" id="refresh-btn" aria-label="Refresh auction data">
+                        &#8635; Refresh
+                    </button>
+                    <label class="auto-refresh-toggle">
+                        <input type="checkbox" id="auto-refresh-checkbox" aria-label="Auto-refresh every 60 seconds">
+                        <span>Auto-refresh</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Stats summary -->
+            <section class="stats-summary" aria-label="Auction statistics">
+                <div class="stat-box" id="stat-total-auctions">
+                    <span class="stat-value" aria-label="Total auctions">--</span>
+                    <span class="stat-label">Auctions</span>
+                </div>
+                <div class="stat-box" id="stat-total-dkp">
+                    <span class="stat-value" aria-label="Total DKP spent">--</span>
+                    <span class="stat-label">DKP Spent</span>
+                </div>
+                <div class="stat-box" id="stat-unique-winners">
+                    <span class="stat-value" aria-label="Unique winners">--</span>
+                    <span class="stat-label">Winners</span>
+                </div>
+            </section>
+
+            <!-- Error message (hidden by default) -->
+            <div id="error-message" class="error-banner" role="alert" aria-live="polite" hidden>
+                <p class="error-text">Unable to reach the auction service. Please try again.</p>
+                <button type="button" id="retry-btn" class="retry-button">Retry</button>
+            </div>
+
+            <!-- Loading indicator (hidden by default) -->
+            <div id="loading-indicator" class="loading" role="status" aria-live="polite" hidden>
+                <span class="loading-spinner" aria-hidden="true"></span>
+                <span>Loading auctions...</span>
+            </div>
+
+            <!-- Auction history table -->
+            <section class="table-container" aria-label="Auction history">
+                <table id="auction-table" aria-describedby="table-caption">
+                    <caption id="table-caption">
+                        Recent DKP auction results. Click a row to view full bid history.
+                    </caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" data-sort="item_name" class="sortable" role="button" tabindex="0" aria-label="Sort by item name">Item<span class="sort-arrow"></span></th>
+                            <th scope="col" data-sort="winner" class="sortable" role="button" tabindex="0" aria-label="Sort by winner">Winner<span class="sort-arrow"></span></th>
+                            <th scope="col" data-sort="amount" class="sortable" role="button" tabindex="0" aria-label="Sort by amount">Amount<span class="sort-arrow"></span></th>
+                            <th scope="col" data-sort="timestamp" class="sortable sorted" role="button" tabindex="0" aria-label="Sort by date">Date<span class="sort-arrow"> &#9660;</span></th>
+                            <th scope="col" data-sort="bids" class="sortable" role="button" tabindex="0" aria-label="Sort by bid count">Bids<span class="sort-arrow"></span></th>
+                            <th scope="col" class="visually-hidden">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auction-table-body">
+                        <!-- Auction rows rendered by app.js -->
+                        <!-- Example row structure (for reference, rendered dynamically):
+                        <tr class="auction-row" tabindex="0" aria-expanded="false" data-auction-id="...">
+                            <td class="col-item">Blade of Carnage</td>
+                            <td class="col-winner">Playername</td>
+                            <td class="col-amount">250</td>
+                            <td class="col-date">2026-04-29</td>
+                            <td class="col-bids">5</td>
+                            <td class="col-toggle" aria-hidden="true">&#9660;</td>
+                        </tr>
+                        <tr class="bid-detail-row" hidden>
+                            <td colspan="6">
+                                <div class="bid-detail-content">
+                                    <table class="bid-history-table" aria-label="Bid history for Blade of Carnage">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Player</th>
+                                                <th scope="col">Amount</th>
+                                                <th scope="col">Type</th>
+                                                <th scope="col">Correction</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Bidder1</td>
+                                                <td>200</td>
+                                                <td>main</td>
+                                                <td>No</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        -->
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- No results message (hidden by default) -->
+            <div id="no-results" class="no-results" role="status" aria-live="polite" hidden>
+                <p>No auctions match your search.</p>
+            </div>
+
+            <!-- Pagination controls -->
+            <nav class="pagination" aria-label="Auction table pagination">
+                <button type="button" id="pagination-prev" disabled aria-label="Previous page">
+                    &larr; Previous
+                </button>
+                <span id="pagination-info" class="pagination-info" aria-live="polite">
+                    Page 1
+                </span>
+                <button type="button" id="pagination-next" disabled aria-label="Next page">
+                    Next &rarr;
+                </button>
+            </nav>
+        </section>
+
+        <!-- Character Listing View (hidden by default) -->
+        <div id="character-listing-view" hidden></div>
+
+        <!-- Character Detail View (hidden by default) -->
+        <div id="character-detail-view" hidden></div>
+    </main>
+
+    <footer role="contentinfo">
+        <p>&copy; DKP Bid Tracker &mdash; Auction history viewer</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

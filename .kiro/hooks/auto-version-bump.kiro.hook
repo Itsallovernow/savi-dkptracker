@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Auto Version Bump",
+  "description": "Automatically increments the patch version in dkptrackerv3.py when the file is edited. Follows the scheme: 3.0.0 → 3.0.1 → ... → 3.0.99 → 3.1.0.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/dkptrackerv3.py"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "The file dkptrackerv3.py was just edited. Read the current __version__ value from the file, increment the patch number by 1 (e.g., \"3.0.0\" → \"3.0.1\"). If the patch number reaches 99, roll over to the next minor version (e.g., \"3.0.99\" → \"3.1.0\"). Update the __version__ string in the file. Do not make any other changes. Do not increment if the version was already bumped in this same edit session (check if the edit that triggered this hook was itself a version bump)."
+  }
+}

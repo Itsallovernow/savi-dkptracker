@@ -1,0 +1,1983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DKP History</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        a {
+            color: #00d4ff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #66e5ff;
+            text-decoration: underline;
+        }
+
+        a:focus-visible {
+            outline: 2px solid #00d4ff;
+            outline-offset: 2px;
+            border-radius: 2px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .nav-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-right: auto;
+        }
+
+        .nav-btn {
+            padding: 8px 16px;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: #0f3460;
+            border-color: #00d4ff;
+        }
+
+        .nav-btn:focus-visible {
+            outline: 2px solid #00d4ff;
+            outline-offset: 2px;
+            background: #0f3460;
+            border-color: #00d4ff;
+        }
+
+        .nav-btn.active {
+            background: #0f3460;
+            border-color: #00d4ff;
+            color: #00d4ff;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .nav-btn:disabled:hover {
+            background: #1a1a2e;
+            border-color: #0f3460;
+        }
+
+        #main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .version-warning {
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 1px solid #f39c12;
+            border-radius: 6px;
+            background: #3d2e0a;
+            color: #f5c842;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* ─── Item Search Dropdown ─────────────────────────────────── */
+        .item-search-container {
+            position: relative;
+            max-width: 480px;
+            margin-bottom: 24px;
+        }
+
+        .item-search-container label {
+            display: block;
+            margin-bottom: 6px;
+            color: #00d4ff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .item-search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #0f3460;
+            border-radius: 4px;
+            background: #16213e;
+            color: #e0e0e0;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .item-search-input:focus {
+            border-color: #00d4ff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+
+        .item-search-input::placeholder {
+            color: #666;
+        }
+
+        .item-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            max-height: 280px;
+            overflow-y: auto;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            z-index: 100;
+            display: none;
+        }
+
+        .item-dropdown.open {
+            display: block;
+        }
+
+        .item-dropdown-item {
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            transition: background 0.15s;
+        }
+
+        .item-dropdown-item:hover,
+        .item-dropdown-item.highlighted {
+            background: #0f3460;
+            color: #00d4ff;
+        }
+
+        .item-dropdown-item .match-highlight {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .item-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .item-dropdown::-webkit-scrollbar-track {
+            background: #1a1a2e;
+        }
+
+        .item-dropdown::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 3px;
+        }
+
+        .item-records-container {
+            margin-top: 16px;
+        }
+
+        .selected-item-header {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .no-items-message {
+            color: #888;
+            margin-top: 40px;
+            font-style: italic;
+        }
+
+        /* ─── Drop Cards Horizontal Scroll ─────────────────────────── */
+        .drop-cards-row {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding: 12px 4px 16px 4px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: #0f3460 #1a1a2e;
+        }
+
+        .drop-cards-row::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .drop-cards-row::-webkit-scrollbar-track {
+            background: #1a1a2e;
+            border-radius: 4px;
+        }
+
+        .drop-cards-row::-webkit-scrollbar-thumb {
+            background: #0f3460;
+            border-radius: 4px;
+        }
+
+        .drop-cards-row::-webkit-scrollbar-thumb:hover {
+            background: #00d4ff;
+        }
+
+        .drop-card {
+            flex: 0 0 220px;
+            min-width: 220px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .drop-card:hover {
+            border-color: #00d4ff;
+        }
+
+        .drop-card-date {
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .drop-card-winner {
+            font-size: 1rem;
+            color: #50fa7b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .drop-card-amount {
+            font-size: 1.1rem;
+            color: #ff79c6;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .drop-card-scroll-hint {
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-style: italic;
+        }
+
+        /* ─── Drop Card Bid List ───────────────────────────────────── */
+        .drop-card-winner a {
+            color: #50fa7b;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .drop-card-winner a:hover {
+            text-decoration: underline;
+            color: #69ffab;
+        }
+
+        .drop-card-bids {
+            border-top: 1px solid #0f3460;
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+
+        .drop-card-bid-entry {
+            font-size: 0.82rem;
+            color: #ccc;
+            padding: 2px 0;
+            white-space: nowrap;
+        }
+
+        .drop-card-bid-entry a {
+            color: #8be9fd;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .drop-card-bid-entry a:hover {
+            color: #00d4ff;
+            text-decoration: underline;
+        }
+
+        .drop-card-bid-entry .bid-amount {
+            color: #ff79c6;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .drop-card-bid-entry .bid-type {
+            color: #888;
+            font-size: 0.78rem;
+        }
+
+        .drop-card-bid-entry.correction {
+            font-style: italic;
+            color: #999;
+        }
+
+        .drop-card-bid-entry.correction a {
+            color: #6bc5d9;
+            font-style: italic;
+        }
+
+        .drop-card-bid-entry .correction-marker {
+            color: #f39c12;
+            font-weight: bold;
+        }
+
+        /* ─── Player Profile ───────────────────────────────────────── */
+        .player-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .player-profile-header h2 {
+            font-size: 1.4rem;
+            color: #50fa7b;
+            font-weight: 700;
+        }
+
+        .player-profile-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            flex: 1 1 140px;
+            min-width: 130px;
+            max-width: 200px;
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 8px;
+            padding: 14px 16px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: #00d4ff;
+        }
+
+        .stat-card-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 4px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .stat-card-value.win-rate {
+            color: #50fa7b;
+        }
+
+        .stat-card-value.main-color {
+            color: #ff79c6;
+        }
+
+        .stat-card-value.alt-color {
+            color: #bd93f9;
+        }
+
+        .stat-card-label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .player-bid-breakdown {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .bid-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bid-type-badge.main {
+            background: rgba(255, 121, 198, 0.15);
+            color: #ff79c6;
+            border: 1px solid rgba(255, 121, 198, 0.3);
+        }
+
+        .bid-type-badge.alt {
+            background: rgba(189, 147, 249, 0.15);
+            color: #bd93f9;
+            border: 1px solid rgba(189, 147, 249, 0.3);
+        }
+
+        /* ─── Player Bid List Table ────────────────────────────────── */
+        .player-bid-list-header {
+            font-size: 1.1rem;
+            color: #00d4ff;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .player-bid-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .player-bid-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #0f3460;
+            background: #16213e;
+        }
+
+        .player-bid-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #0f3460;
+            color: #e0e0e0;
+        }
+
+        .player-bid-table tr:hover td {
+            background: rgba(15, 52, 96, 0.4);
+        }
+
+        .player-bid-table .item-link {
+            color: #00d4ff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .player-bid-table .item-link:hover {
+            text-decoration: underline;
+            color: #66e5ff;
+        }
+
+        .player-bid-table .won-indicator {
+            color: #50fa7b;
+            font-weight: bold;
+        }
+
+        .player-bid-table .lost-indicator {
+            color: #ff5555;
+            font-weight: bold;
+        }
+
+        .player-bid-table .bid-type-badge {
+            font-size: 0.75rem;
+        }
+
+        .player-bid-list-empty {
+            color: #888;
+            font-style: italic;
+            margin-top: 12px;
+        }
+
+        /* ─── Trend Chart ──────────────────────────────────────────── */
+        #trend-chart-container {
+            margin-top: 24px;
+            width: 100%;
+        }
+
+        #trend-chart-container svg {
+            background: #16213e;
+            border: 1px solid #0f3460;
+            border-radius: 6px;
+        }
+
+        /* ─── Statistics Panel ─────────────────────────────────────── */
+        .stats-panel {
+            margin-top: 8px;
+        }
+
+        .stats-section {
+            margin-bottom: 32px;
+        }
+
+        .stats-section-title {
+            font-size: 1.1rem;
+            color: #00d4ff;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #0f3460;
+        }
+
+        .stats-empty {
+            color: #888;
+            font-style: italic;
+        }
+
+        .stats-table {
+            width: 100%;
+            max-width: 600px;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .stats-table th {
+            text-align: left;
+            padding: 10px 12px;
+            color: #888;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #0f3460;
+            background: #16213e;
+        }
+
+        .stats-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #0f3460;
+            color: #e0e0e0;
+        }
+
+        .stats-table tr:hover td {
+            background: rgba(15, 52, 96, 0.4);
+        }
+
+        .stats-rank {
+            color: #888;
+            font-weight: bold;
+            width: 40px;
+        }
+
+        .stats-count {
+            color: #ff79c6;
+            font-weight: bold;
+            width: 120px;
+            font-family: 'Consolas', 'Courier New', monospace;
+        }
+
+        .stats-item-link {
+            color: #00d4ff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .stats-item-link:hover {
+            text-decoration: underline;
+            color: #66e5ff;
+        }
+
+        .stats-table td a:not(.stats-item-link) {
+            color: #50fa7b;
+        }
+
+        .stats-table td a:not(.stats-item-link):hover {
+            color: #69ffab;
+            text-decoration: underline;
+        }
+
+        /* ─── Loading Spinner ──────────────────────────────────────── */
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+        .loading-spinner::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 3px solid #0f3460;
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <span class="nav-title">&#9876; DKP History</span>
+        <button class="nav-btn active" id="btn-items" onclick="navigate('items')">Items</button>
+        <button class="nav-btn" id="btn-stats" onclick="navigate('stats')">Stats</button>
+        <button class="nav-btn" id="btn-import" onclick="importLog()">Import</button>
+        <button class="nav-btn" id="btn-export" onclick="exportJSON()" disabled>Export</button>
+    </nav>
+
+    <div id="main-content"></div>
+
+    <script>
+        // ─── PATTERNS — bid-parsing regex (ported from dkptrackerv3.py) ───
+        // Matches: [timestamp] PlayerName tells the raid,  'Item 100 alt'
+        // Groups: 1=player, 2=item, 3=amount, 4=xN multiplier (optional), 5=alt/a (optional)
+        const BID_PATTERN = /\[.*?\] (.*?) tells the raid,\s+'([A-Za-z].+?)\s*(\d+)\s*(x\d+)?\s*(alt|a)?[^']*'/i;
+
+        // Matches: [timestamp] You tell your raid,  'Item 100 alt'
+        // Groups: 1=item, 2=amount, 3=xN multiplier (optional), 4=alt/a (optional)
+        const YOU_PATTERN = /\[.*?\] You tell your raid,\s+'([A-Za-z].+?)\s*(\d+)\s*(x\d+)?\s*(alt|a)?[^']*'/i;
+
+        // Matches auction close: "Item;Amount;Winner gratss"
+        // Applied to the inner quoted text of a raid tell
+        // Groups: 1=item, 2=amount, 3=winner
+        const GRATSS_PATTERN = /^(.+?);\s*(\d+);\s*(.+?)\s+gratss\b/i;
+
+        // Matches auction reopen: "Item;Amount;Player ungratss"
+        // Groups: 1=item, 2=amount, 3=player
+        const UNGRATSS_PATTERN = /^(.+?);\s*(\d+);\s*(.+?)\s+ungratss\b/i;
+
+        // Matches retraction: player says "sorry - meant 460" or "oops meant 460"
+        // Groups: 1=player, 2=new amount
+        const RETRACTION_PATTERN = /\[.*?\] (\S+) tells the raid,\s+'(?:sorry|oops|err+|my bad|mb)[^']*?\bmeant\b[^']*?(\d+)/i;
+
+        // Matches auction announcement: pipe-separated item list in a raid/guild tell
+        // Groups: 1=pipe-separated item list
+        const AUCTION_ANNOUNCE_PATTERN = /\[.*?\] (?:.*? tells the raid,|You tell your raid,|.*? tells the guild,|You say to your guild,)\s+'(.+\|.+)'/i;
+
+        // Matches quantity suffix on item names: "Item Name (2)"
+        // Groups: 1=item name, 2=quantity
+        const QTY_PATTERN = /^(.+?)\s*\((\d+)\)\s*$/;
+
+        // Matches EQ log timestamp: [Day Mon DD HH:MM:SS YYYY]
+        // Groups: 1=full timestamp string
+        const TIMESTAMP_PATTERN = /\[(\w+ \w+ +\d+ \d+:\d+:\d+ \d+)\]/;
+
+        // Lines from noisy channels that are never auction-related
+        const IGNORED_CHANNEL_PATTERN = /\[.*?\] \S+ tells (?:General|Ports|LFG|Lfg|ztsavagespam)\s*:\s*\d+,/i;
+
+        // Lines containing these strings are always ignored
+        const IGNORED_CONTENT_PATTERN = /\bzealtag\b/i;
+
+        // Chat noise detection: words that appear in conversation but never in EQ item names
+        const CHAT_WORDS_PATTERN = /\b(he|she|it|me|my|we|you|they|him|her|his|its|our|their|i|hit|hits|miss|for|a\s+few|few|times|plus|abd|lvl|level|forever|nah|lol|omg|wtf|gg|brb|afk|lfg|wtb|wts|sorry|oops|meant|err+|my\s+bad|mb|at|inc|incoming|coth|up|go|goes|went|to|into|onto|from|with|about|over|under|is|was|are|were|be|been|being|have|has|had|do|does|did|will|would|could|should|may|might|shall|must|can|and|but|or|so|yet|nor|although|because|since|unless|until|just|really|very|too|also|even|still|already|always|never|here|there|where|when|how|why|what|who|which)\b/i;
+
+        // ─── Parser — parseLogFile(text) ──────────────────────────────
+        // Ports the core auction detection logic from dkptrackerv3.py process_line()
+        // Returns an array of AuctionRecord objects.
+
+        /**
+         * Determine if an item name looks like chat noise rather than a real EQ item.
+         */
+        function isChatNoise(item) {
+            if (/\bskip\b/i.test(item)) return true;
+            if (item.includes('@')) return true;
+            if (item.split(/\s+/).length > 7) return true;
+            // Contractions (not possessives): he's, don't, can't, I'm, they're
+            if (/'\s*(m|re|ve|ll|d|t|nt)\b/i.test(item)) return true;
+            if (CHAT_WORDS_PATTERN.test(item)) return true;
+            return false;
+        }
+
+        /**
+         * Parse bid fields from raw regex captures.
+         * Handles alt formats: 'Item 100 alt', 'Item alt 100', '100alt'
+         * Returns { item, amount, isAlt }
+         */
+        function parseBidFields(rawItem, rawAmount, altGroup) {
+            let item = rawItem;
+            let amount = rawAmount;
+            let isAlt = !!(altGroup && altGroup.trim().toLowerCase().match(/^(alt|a)$/));
+
+            // 'Item alt 100' — alt absorbed into item name
+            if (!isAlt && /\balt?\b\s*$/i.test(item)) {
+                item = item.replace(/\s*\balt?\b\s*$/i, '').trim();
+                isAlt = true;
+            }
+
+            // '100alt' or '100a' — alt glued to number
+            if (!isAlt) {
+                const m = amount.trim().match(/^(\d+)\s*alt?$/i);
+                if (m) {
+                    amount = m[1];
+                    isAlt = true;
+                }
+            }
+
+            // Strip xN multiplier from amount
+            amount = amount.replace(/\s*x\d+\s*$/i, '').trim();
+
+            return { item: item.trim(), amount, isAlt };
+        }
+
+        /**
+         * Simple fuzzy match: returns a similarity ratio (0-100) between two strings.
+         * Uses a basic character-level comparison (Levenshtein-based ratio approximation).
+         */
+        function fuzzyRatio(a, b) {
+            a = a.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            b = b.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            if (a === b) return 100;
+            if (!a || !b) return 0;
+
+            // Simple longest common subsequence ratio
+            const lenA = a.length, lenB = b.length;
+            const maxLen = Math.max(lenA, lenB);
+            if (maxLen === 0) return 100;
+
+            // Levenshtein distance
+            const dp = Array.from({ length: lenA + 1 }, () => new Array(lenB + 1).fill(0));
+            for (let i = 0; i <= lenA; i++) dp[i][0] = i;
+            for (let j = 0; j <= lenB; j++) dp[0][j] = j;
+            for (let i = 1; i <= lenA; i++) {
+                for (let j = 1; j <= lenB; j++) {
+                    if (a[i - 1] === b[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+                    }
+                }
+            }
+            const dist = dp[lenA][lenB];
+            return Math.round(((maxLen - dist) / maxLen) * 100);
+        }
+
+        /**
+         * Find the best matching announced item for a bid item name.
+         * Returns the matching announced item name, or null if no match.
+         */
+        function findAnnouncedMatch(bidItem, announcedItems) {
+            const bidLower = bidItem.toLowerCase().replace(/[^\w\s]/g, '').trim();
+            for (const announced of announcedItems) {
+                const annLower = announced.toLowerCase().replace(/[^\w\s]/g, '').trim();
+                if (annLower === bidLower) return announced;
+            }
+            // Fuzzy match
+            for (const announced of announcedItems) {
+                if (fuzzyRatio(bidItem, announced) >= 85) return announced;
+            }
+            // Substring containment check
+            for (const announced of announcedItems) {
+                const annLower = announced.toLowerCase();
+                if (annLower.includes(bidLower) || bidLower.includes(annLower)) return announced;
+            }
+            return null;
+        }
+
+        /**
+         * Parse an EQ log file text and return an array of AuctionRecord objects.
+         * Replicates the core auction detection logic from dkptrackerv3.py.
+         *
+         * @param {string} text - The full text content of an EQ log file
+         * @returns {Array<{item_name: string, winner: string, amount: number, timestamp: string, bids: Array}>}
+         */
+        function parseLogFile(text) {
+            const lines = text.split(/\r?\n/);
+            const results = [];
+
+            // Active auction state
+            const announcedItems = new Set();   // currently announced item names
+            const bidsByItem = {};              // item -> { main: {player: amount}, alt: {player: amount}, history: [] }
+            const bidOrder = [];               // ordered list of items that have received bids
+
+            // Extract timestamp from a log line for the auction record
+            function extractTimestamp(line) {
+                const m = TIMESTAMP_PATTERN.exec(line);
+                if (!m) return null;
+                try {
+                    // Parse: "Mon May 11 21:18:56 2026"
+                    const parts = m[1].trim().split(/\s+/);
+                    // parts: [Day, Mon, DD, HH:MM:SS, YYYY]
+                    const months = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+                    const month = months[parts[1]];
+                    const day = parseInt(parts[2], 10);
+                    const timeParts = parts[3].split(':');
+                    const year = parseInt(parts[4], 10);
+                    const d = new Date(Date.UTC(year, month, day, parseInt(timeParts[0]), parseInt(timeParts[1]), parseInt(timeParts[2])));
+                    return d.toISOString().replace('.000Z', 'Z');
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function ensureItem(item) {
+                if (!bidsByItem[item]) {
+                    bidsByItem[item] = { main: {}, alt: {}, history: [] };
+                }
+            }
+
+            function updateBid(item, player, amount, isAlt) {
+                amount = parseInt(amount, 10);
+                if (isNaN(amount) || amount < 2) return;
+
+                const bidType = isAlt ? 'alt' : 'main';
+                ensureItem(item);
+                const itemBids = bidsByItem[item][bidType];
+                const history = bidsByItem[item].history;
+                const prev = itemBids[player] || 0;
+
+                if (!bidOrder.includes(item)) {
+                    bidOrder.push(item);
+                }
+
+                if (amount > prev) {
+                    itemBids[player] = amount;
+                    history.push({ player, amount, bid_type: bidType, is_correction: false });
+                } else if (prev > 0 && isDigitTypo(amount, prev)) {
+                    // Typo correction: e.g. 2225 -> 225
+                    itemBids[player] = amount;
+                    history.push({ player, amount, bid_type: bidType, is_correction: true });
+                }
+                // Otherwise ignore lower/equal bids
+            }
+
+            function isDigitTypo(prev, newAmt) {
+                // True if newAmt looks like prev with an extra digit (e.g. 225->2225)
+                if (newAmt <= prev) return false;
+                const sp = String(prev), sn = String(newAmt);
+                const ratio = newAmt / prev;
+                return ratio >= 5 && ratio <= 20 && sn.includes(sp);
+            }
+
+            function retractBid(player, newAmount) {
+                newAmount = parseInt(newAmount, 10);
+                // Search bid_order in reverse to find most recent item this player bid on
+                for (let i = bidOrder.length - 1; i >= 0; i--) {
+                    const item = bidOrder[i];
+                    for (const bidType of ['main', 'alt']) {
+                        if (bidsByItem[item] && bidsByItem[item][bidType][player] !== undefined) {
+                            bidsByItem[item][bidType][player] = newAmount;
+                            bidsByItem[item].history.push({
+                                player, amount: newAmount, bid_type: bidType, is_correction: true
+                            });
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function closeItem(item, winner, amount, timestamp) {
+                const history = bidsByItem[item] ? [...bidsByItem[item].history] : [];
+                results.push({
+                    item_name: item,
+                    winner: winner,
+                    amount: amount,
+                    timestamp: timestamp || new Date().toISOString().replace('.000Z', 'Z'),
+                    bids: history
+                });
+                // Clean up
+                delete bidsByItem[item];
+                const idx = bidOrder.indexOf(item);
+                if (idx !== -1) bidOrder.splice(idx, 1);
+            }
+
+            // Process each line
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                // Skip ignored channels and content
+                if (IGNORED_CHANNEL_PATTERN.test(line)) continue;
+                if (IGNORED_CONTENT_PATTERN.test(line)) continue;
+
+                // --- Auction announcement ---
+                const am = AUCTION_ANNOUNCE_PATTERN.exec(line);
+                if (am) {
+                    const items = am[1].split('|').map(s => s.trim()).filter(Boolean);
+                    for (let raw of items) {
+                        if (raw.toLowerCase().startsWith('ancient:')) continue;
+                        let name = raw;
+                        const qm = QTY_PATTERN.exec(raw);
+                        if (qm) {
+                            name = qm[1].trim();
+                        }
+                        announcedItems.add(name);
+                    }
+                    continue;
+                }
+
+                // --- Extract inner quoted text for gratss/ungratss ---
+                let inner = line;
+                const quoted = line.match(/'(.+)'/);
+                if (quoted) {
+                    inner = quoted[1];
+                }
+                inner = inner.trim();
+
+                // Check ungratss BEFORE gratss (ungratss contains the word gratss)
+                const um = UNGRATSS_PATTERN.exec(inner);
+                if (um) {
+                    // Ungratss: reopen the auction — for browser import we just skip it
+                    // (we don't have the snapshot to restore, so we ignore ungratss)
+                    continue;
+                }
+
+                // --- Gratss close ---
+                const gm = GRATSS_PATTERN.exec(inner);
+                if (gm) {
+                    const gItem = gm[1].trim();
+                    const gAmount = parseInt(gm[2], 10);
+                    const gWinner = gm[3].trim();
+                    const ts = extractTimestamp(line);
+
+                    // Find the matching item in our tracked bids
+                    // First try exact match in bidsByItem
+                    let matchedItem = null;
+                    if (bidsByItem[gItem]) {
+                        matchedItem = gItem;
+                    } else {
+                        // Try fuzzy match against tracked items
+                        const tracked = Object.keys(bidsByItem);
+                        for (const t of tracked) {
+                            if (fuzzyRatio(gItem, t) >= 85) {
+                                matchedItem = t;
+                                break;
+                            }
+                        }
+                        // Also try against announced items
+                        if (!matchedItem) {
+                            const announced = findAnnouncedMatch(gItem, announcedItems);
+                            if (announced && bidsByItem[announced]) {
+                                matchedItem = announced;
+                            }
+                        }
+                    }
+
+                    if (matchedItem) {
+                        closeItem(matchedItem, gWinner, gAmount, ts);
+                    } else {
+                        // Item was gratss'd but we have no bids tracked — still record it
+                        closeItem(gItem, gWinner, gAmount, ts);
+                    }
+                    continue;
+                }
+
+                // --- Retraction ---
+                const rm = RETRACTION_PATTERN.exec(line);
+                if (rm) {
+                    const rPlayer = rm[1].trim();
+                    const rAmount = rm[2];
+                    retractBid(rPlayer, rAmount);
+                    continue;
+                }
+
+                // --- Bids: other players ---
+                const bm = BID_PATTERN.exec(line);
+                if (bm) {
+                    const player = bm[1].trim();
+                    const { item, amount, isAlt } = parseBidFields(bm[2].trim(), bm[3].trim(), bm[5]);
+                    if (!isChatNoise(item)) {
+                        // Match against announced items
+                        const match = findAnnouncedMatch(item, announcedItems);
+                        if (match) {
+                            updateBid(match, player, amount, isAlt);
+                        }
+                    }
+                    continue;
+                }
+
+                // --- Bids: your own character ---
+                const ym = YOU_PATTERN.exec(line);
+                if (ym) {
+                    const { item, amount, isAlt } = parseBidFields(ym[1].trim(), ym[2].trim(), ym[4]);
+                    if (!isChatNoise(item)) {
+                        const match = findAnnouncedMatch(item, announcedItems);
+                        if (match) {
+                            // For "You" bids, we don't know the player name from the line
+                            // Use "You" as placeholder — the caller can replace if needed
+                            updateBid(match, 'You', amount, isAlt);
+                        }
+                    }
+                    continue;
+                }
+            }
+
+            return results;
+        }
+
+        // ─── State Store ───────────────────────────────────────────────
+        const Store = {
+            records: [],            // loaded from dkp_history.json
+            importedKeys: new Set(),// dedup keys from browser-imported records
+            view: 'items',          // 'items' | 'player' | 'stats'
+            selectedItem: null,
+            selectedPlayer: null,
+        };
+
+        // ─── Navigation / Router ───────────────────────────────────────
+        function navigate(view, params) {
+            if (view === 'items') {
+                window.location.hash = params ? `item=${encodeURIComponent(params)}` : 'items';
+            } else if (view === 'player') {
+                window.location.hash = `player=${encodeURIComponent(params)}`;
+            } else if (view === 'stats') {
+                window.location.hash = 'stats';
+            }
+        }
+
+        function handleRoute() {
+            const hash = window.location.hash.slice(1);
+            // Update active nav button
+            document.getElementById('btn-items').classList.remove('active');
+            document.getElementById('btn-stats').classList.remove('active');
+
+            if (hash.startsWith('player=')) {
+                Store.view = 'player';
+                Store.selectedPlayer = decodeURIComponent(hash.slice(7));
+                renderPlayerProfile(Store.selectedPlayer);
+            } else if (hash === 'stats') {
+                Store.view = 'stats';
+                document.getElementById('btn-stats').classList.add('active');
+                renderStats();
+            } else {
+                Store.view = 'items';
+                document.getElementById('btn-items').classList.add('active');
+                if (hash.startsWith('item=')) {
+                    Store.selectedItem = decodeURIComponent(hash.slice(5));
+                }
+                renderItemList();
+            }
+        }
+
+        window.addEventListener('hashchange', handleRoute);
+
+        // ─── Data Loading ──────────────────────────────────────────────
+        const SUPPORTED_VERSION = 1;
+
+        async function loadHistory() {
+            document.getElementById('main-content').innerHTML = '<div class="loading-spinner"></div>';
+            try {
+                const response = await fetch('dkp_history.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                const data = await response.json();
+                Store.records = Array.isArray(data.records) ? data.records : [];
+
+                // Check schema version and show warning if unrecognised
+                if (data.version !== SUPPORTED_VERSION) {
+                    const fileVersion = data.version !== undefined ? data.version : 'missing';
+                    Store._versionWarning = `\u26A0 Warning: This history file uses schema version ${fileVersion}, but this viewer supports version ${SUPPORTED_VERSION}. Some data may not display correctly.`;
+                } else {
+                    Store._versionWarning = null;
+                }
+            } catch (err) {
+                Store.records = [];
+                document.getElementById('main-content').innerHTML = `
+                    <div style="margin-top:40px; padding:24px; border:1px solid #e74c3c; border-radius:8px; background:#2c1a1a;">
+                        <h2 style="color:#e74c3c; margin-bottom:12px;">&#9888; Unable to load history data</h2>
+                        <p style="margin-bottom:12px;">Could not load <code style="color:#00d4ff;">dkp_history.json</code>.</p>
+                        <p style="margin-bottom:8px; color:#ccc;"><strong>Error:</strong> ${err.message}</p>
+                        <hr style="border-color:#444; margin:16px 0;">
+                        <p style="margin-bottom:8px;">To fix this:</p>
+                        <ol style="margin-left:20px; line-height:1.8; color:#ccc;">
+                            <li>Make sure <code style="color:#00d4ff;">dkp_history.json</code> is in the same directory as this HTML file.</li>
+                            <li>Serve the files via a local HTTP server (browsers block <code>fetch()</code> for local files).<br>
+                                <span style="color:#888;">Example: <code style="color:#0f0;">python -m http.server 8000</code> then open <code>http://localhost:8000/dkp_history.html</code></span>
+                            </li>
+                            <li>Alternatively, use the <strong>Import</strong> button above to load a log file directly in the browser.</li>
+                        </ol>
+                    </div>
+                `;
+                return;
+            }
+            handleRoute();
+        }
+
+        // ─── Views ─────────────────────────────────────────────────────
+        function getVersionWarningHtml() {
+            if (!Store._versionWarning) return '';
+            return `<div class="version-warning">${Store._versionWarning}</div>`;
+        }
+
+        function renderItemList() {
+            const container = document.getElementById('main-content');
+
+            // Extract distinct item names with counts, sort alphabetically (case-insensitive)
+            const itemCounts = {};
+            for (const r of Store.records) {
+                if (r.item_name) {
+                    itemCounts[r.item_name] = (itemCounts[r.item_name] || 0) + 1;
+                }
+            }
+            const allItems = Object.keys(itemCounts).sort((a, b) =>
+                a.toLowerCase().localeCompare(b.toLowerCase())
+            );
+
+            // Build the searchable dropdown HTML
+            let html = getVersionWarningHtml();
+            html += `
+                <div class="item-search-container">
+                    <label for="item-search">Search Items</label>
+                    <input type="text" id="item-search" class="item-search-input"
+                           placeholder="Type to filter items\u2026"
+                           autocomplete="off"
+                           value="${Store.selectedItem ? Store.selectedItem.replace(/"/g, '&quot;') : ''}">
+                    <div class="item-dropdown" id="item-dropdown"></div>
+                </div>
+                <div class="item-records-container" id="item-records"></div>
+            `;
+            container.innerHTML = html;
+
+            const input = document.getElementById('item-search');
+            const dropdown = document.getElementById('item-dropdown');
+            let highlightedIndex = -1;
+            let filteredItems = [];
+
+            function highlightMatch(text, query) {
+                if (!query) return text;
+                const idx = text.toLowerCase().indexOf(query.toLowerCase());
+                if (idx === -1) return text;
+                return text.slice(0, idx) +
+                    '<span class="match-highlight">' + text.slice(idx, idx + query.length) + '</span>' +
+                    text.slice(idx + query.length);
+            }
+
+            function renderDropdown(query) {
+                if (!query && !input.matches(':focus')) {
+                    dropdown.classList.remove('open');
+                    return;
+                }
+
+                filteredItems = query
+                    ? allItems.filter(name => name.toLowerCase().includes(query.toLowerCase()))
+                    : allItems;
+
+                if (filteredItems.length === 0) {
+                    dropdown.innerHTML = '<div class="item-dropdown-item" style="color:#888; cursor:default;">No matching items</div>';
+                    dropdown.classList.add('open');
+                    highlightedIndex = -1;
+                    return;
+                }
+
+                dropdown.innerHTML = filteredItems.map((name, i) =>
+                    `<div class="item-dropdown-item${i === highlightedIndex ? ' highlighted' : ''}"
+                          data-index="${i}" data-item="${name.replace(/"/g, '&quot;')}">${highlightMatch(name, query)} <span style="color:#888; font-size:0.8rem;">(${itemCounts[name]})</span></div>`
+                ).join('');
+                dropdown.classList.add('open');
+            }
+
+            function selectItem(name) {
+                dropdown.classList.remove('open');
+                input.value = name;
+                Store.selectedItem = name;
+                navigate('items', name);
+            }
+
+            // Input event — filter as user types
+            input.addEventListener('input', () => {
+                highlightedIndex = -1;
+                renderDropdown(input.value.trim());
+            });
+
+            // Focus — show dropdown
+            input.addEventListener('focus', () => {
+                renderDropdown(input.value.trim());
+            });
+
+            // Click outside — close dropdown
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!e.target.closest('.item-search-container')) {
+                    dropdown.classList.remove('open');
+                }
+            });
+
+            // Keyboard navigation
+            input.addEventListener('keydown', (e) => {
+                if (!dropdown.classList.contains('open')) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    highlightedIndex = Math.min(highlightedIndex + 1, filteredItems.length - 1);
+                    renderDropdown(input.value.trim());
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    highlightedIndex = Math.max(highlightedIndex - 1, 0);
+                    renderDropdown(input.value.trim());
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (highlightedIndex >= 0 && highlightedIndex < filteredItems.length) {
+                        selectItem(filteredItems[highlightedIndex]);
+                    } else if (filteredItems.length === 1) {
+                        selectItem(filteredItems[0]);
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.remove('open');
+                    input.blur();
+                }
+            });
+
+            // Click on dropdown item
+            dropdown.addEventListener('click', (e) => {
+                const item = e.target.closest('.item-dropdown-item');
+                if (item && item.dataset.item) {
+                    selectItem(item.dataset.item);
+                }
+            });
+
+            // If an item is selected, show its records container
+            if (Store.selectedItem) {
+                const recordsContainer = document.getElementById('item-records');
+                const itemRecords = Store.records.filter(r => r.item_name === Store.selectedItem);
+                if (itemRecords.length > 0) {
+                    recordsContainer.innerHTML = `
+                        <h2 class="selected-item-header">${Store.selectedItem} (${itemRecords.length} drop${itemRecords.length !== 1 ? 's' : ''})</h2>
+                        <div id="drop-cards-container"></div>
+                        <div id="trend-chart-container"></div>
+                    `;
+                    renderDropCards(itemRecords);
+
+                    // Show trend chart only when item has 2+ records
+                    if (itemRecords.length >= 2) {
+                        const points = itemRecords.map(r => ({
+                            date: toPacific(r.timestamp, 'date'),
+                            amount: r.amount
+                        })).filter(p => p.date && p.amount != null);
+                        drawTrendLine('trend-chart-container', points);
+                    }
+                } else {
+                    recordsContainer.innerHTML = '<p class="no-items-message">No records found for this item.</p>';
+                }
+            } else if (allItems.length === 0) {
+                document.getElementById('item-records').innerHTML =
+                    '<p class="no-items-message">No auction records loaded. Use Import to load a log file.</p>';
+            }
+        }
+
+        function renderPlayerProfile(name) {
+            const container = document.getElementById('main-content');
+
+            // Use global escHtml helper
+            function esc(str) { return escHtml(str); }
+
+            // Find all records where this player placed at least one bid (case-insensitive match)
+            const nameLower = name.toLowerCase();
+            const playerRecords = Store.records.filter(r =>
+                r.bids && r.bids.some(b => b.player && b.player.toLowerCase() === nameLower)
+            );
+
+            // Count total auctions bid on
+            const totalBids = playerRecords.length;
+
+            // Count total auctions won (case-insensitive match on winner)
+            const totalWins = Store.records.filter(r =>
+                r.winner && r.winner.toLowerCase() === nameLower
+            ).length;
+
+            // Calculate win rate
+            const winRate = totalBids > 0 ? ((totalWins / totalBids) * 100).toFixed(1) : '0.0';
+
+            // Count main bids vs alt bids across all records
+            let mainBids = 0;
+            let altBids = 0;
+            for (const record of playerRecords) {
+                for (const bid of record.bids) {
+                    if (bid.player && bid.player.toLowerCase() === nameLower) {
+                        if (bid.bid_type === 'main') {
+                            mainBids++;
+                        } else if (bid.bid_type === 'alt') {
+                            altBids++;
+                        }
+                    }
+                }
+            }
+
+            // Build the profile HTML
+            let html = getVersionWarningHtml();
+
+            html += `
+                <div class="player-profile-header">
+                    <h2>${esc(name)}</h2>
+                </div>
+                <div class="player-profile-stats">
+                    <div class="stat-card">
+                        <div class="stat-card-value">${totalBids}</div>
+                        <div class="stat-card-label">Auctions Bid</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value">${totalWins}</div>
+                        <div class="stat-card-label">Auctions Won</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value win-rate">${winRate}%</div>
+                        <div class="stat-card-label">Win Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value main-color">${mainBids}</div>
+                        <div class="stat-card-label">Main Bids</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-value alt-color">${altBids}</div>
+                        <div class="stat-card-label">Alt Bids</div>
+                    </div>
+                </div>
+                <div id="player-bid-list"></div>
+            `;
+
+            container.innerHTML = html;
+
+            // ─── Render bid list sorted by date descending ─────────────
+            const bidListDiv = document.getElementById('player-bid-list');
+            if (playerRecords.length === 0) {
+                bidListDiv.innerHTML = '<p class="player-bid-list-empty">No bid records found for this player.</p>';
+            } else {
+                // Build bid list data: for each record, get player's highest bid
+                const bidListData = playerRecords.map(record => {
+                    // Find all bids by this player in this record
+                    const playerBids = record.bids.filter(b =>
+                        b.player && b.player.toLowerCase() === nameLower
+                    );
+                    // Get the highest bid amount
+                    let highestBid = playerBids[0];
+                    for (const b of playerBids) {
+                        if (b.amount > highestBid.amount) {
+                            highestBid = b;
+                        }
+                    }
+                    // Determine if the player won
+                    const won = record.winner && record.winner.toLowerCase() === nameLower;
+                    return {
+                        itemName: record.item_name || 'Unknown',
+                        date: toPacific(record.timestamp, 'date'),
+                        highestAmount: highestBid.amount,
+                        bidType: highestBid.bid_type || '',
+                        won: won,
+                        timestamp: record.timestamp || ''
+                    };
+                });
+
+                // Sort by date descending (most recent first)
+                bidListData.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+                // Build table HTML
+                let tableHtml = `<h3 class="player-bid-list-header">Bid History</h3>`;
+                tableHtml += `<table class="player-bid-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Date (PT)</th>
+                            <th>Highest Bid</th>
+                            <th>Type</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                for (const entry of bidListData) {
+                    const itemLink = `<a class="item-link" href="#item=${encodeURIComponent(entry.itemName)}" onclick="event.preventDefault();navigate('items','${esc(entry.itemName.replace(/'/g, "\\'"))}')">${esc(entry.itemName)}</a>`;
+                    const bidTypeHtml = entry.bidType
+                        ? `<span class="bid-type-badge ${entry.bidType}">${entry.bidType.charAt(0).toUpperCase() + entry.bidType.slice(1)}</span>`
+                        : '';
+                    const resultHtml = entry.won
+                        ? '<span class="won-indicator">&#10003;</span>'
+                        : '<span class="lost-indicator">&#10007;</span>';
+
+                    tableHtml += `
+                        <tr>
+                            <td>${itemLink}</td>
+                            <td>${esc(entry.date)}</td>
+                            <td>${entry.highestAmount}</td>
+                            <td>${bidTypeHtml}</td>
+                            <td>${resultHtml}</td>
+                        </tr>`;
+                }
+
+                tableHtml += `</tbody></table>`;
+                bidListDiv.innerHTML = tableHtml;
+            }
+        }
+
+        function renderStats() {
+            const container = document.getElementById('main-content');
+            let html = getVersionWarningHtml();
+            html += '<div class="stats-panel">';
+
+            // ─── Top 10 Contested Items by unique bidder count ─────────
+            // For each item, collect all unique bidder names across all records
+            const itemBidders = {};  // item_name → Set of player names
+            for (const record of Store.records) {
+                const item = record.item_name;
+                if (!item) continue;
+                if (!itemBidders[item]) itemBidders[item] = new Set();
+                if (record.bids) {
+                    for (const bid of record.bids) {
+                        if (bid.player) {
+                            itemBidders[item].add(bid.player.toLowerCase());
+                        }
+                    }
+                }
+            }
+
+            // Rank items by unique bidder count descending
+            const contestedItems = Object.entries(itemBidders)
+                .map(([name, bidders]) => ({ name, count: bidders.size }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+                .slice(0, 10);
+
+            html += '<div class="stats-section">';
+            html += '<h3 class="stats-section-title">Top 10 Most Contested Items</h3>';
+            if (contestedItems.length === 0) {
+                html += '<p class="stats-empty">No auction records available.</p>';
+            } else {
+                html += '<table class="stats-table"><thead><tr><th>#</th><th>Item</th><th>Unique Bidders</th></tr></thead><tbody>';
+                for (let i = 0; i < contestedItems.length; i++) {
+                    const item = contestedItems[i];
+                    const itemLink = `<a class="stats-item-link" href="#item=${encodeURIComponent(item.name)}" onclick="event.preventDefault();navigate('items','${escHtml(item.name.replace(/'/g, "\\'"))}')">${escHtml(item.name)}</a>`;
+                    html += `<tr><td class="stats-rank">${i + 1}</td><td>${itemLink}</td><td class="stats-count">${item.count}</td></tr>`;
+                }
+                html += '</tbody></table>';
+            }
+            html += '</div>';
+
+            // ─── Top 10 Most Active Bidders by auction participation count ─────────
+            // For each player, count how many distinct auction records they participated in
+            const playerParticipation = {};  // player_name → count of records participated in
+            for (const record of Store.records) {
+                if (!record.bids) continue;
+                // Collect unique players in this record
+                const playersInRecord = new Set();
+                for (const bid of record.bids) {
+                    if (bid.player) {
+                        playersInRecord.add(bid.player);
+                    }
+                }
+                // Increment participation count for each player
+                for (const player of playersInRecord) {
+                    if (!playerParticipation[player]) playerParticipation[player] = 0;
+                    playerParticipation[player]++;
+                }
+            }
+
+            // Rank players by participation count descending
+            const activeBidders = Object.entries(playerParticipation)
+                .map(([name, count]) => ({ name, count }))
+                .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+                .slice(0, 10);
+
+            html += '<div class="stats-section">';
+            html += '<h3 class="stats-section-title">Top 10 Most Active Bidders</h3>';
+            if (activeBidders.length === 0) {
+                html += '<p class="stats-empty">No auction records available.</p>';
+            } else {
+                html += '<table class="stats-table"><thead><tr><th>#</th><th>Player</th><th>Auctions Participated</th></tr></thead><tbody>';
+                for (let i = 0; i < activeBidders.length; i++) {
+                    const bidder = activeBidders[i];
+                    html += `<tr><td class="stats-rank">${i + 1}</td><td>${playerLink(bidder.name)}</td><td class="stats-count">${bidder.count}</td></tr>`;
+                }
+                html += '</tbody></table>';
+            }
+            html += '</div>';
+
+            // ─── Overall Main-Win vs Alt-Win Ratio ─────────────────────
+            let mainWins = 0;
+            let altWins = 0;
+            for (const record of Store.records) {
+                if (!record.winner || !record.bids || record.bids.length === 0) continue;
+                const winnerLower = record.winner.toLowerCase();
+                // Find the winner's bid: match player and amount, or fallback to highest bid by winner
+                let winningBid = null;
+                for (const bid of record.bids) {
+                    if (bid.player && bid.player.toLowerCase() === winnerLower && bid.amount === record.amount) {
+                        winningBid = bid;
+                        break;
+                    }
+                }
+                if (!winningBid) {
+                    // Fallback: find the winner's highest bid
+                    let highest = null;
+                    for (const bid of record.bids) {
+                        if (bid.player && bid.player.toLowerCase() === winnerLower) {
+                            if (!highest || bid.amount > highest.amount) {
+                                highest = bid;
+                            }
+                        }
+                    }
+                    winningBid = highest;
+                }
+                if (winningBid) {
+                    if (winningBid.bid_type === 'main') {
+                        mainWins++;
+                    } else if (winningBid.bid_type === 'alt') {
+                        altWins++;
+                    }
+                }
+            }
+
+            const totalWinsBidType = mainWins + altWins;
+            const mainPct = totalWinsBidType > 0 ? ((mainWins / totalWinsBidType) * 100).toFixed(1) : '0.0';
+            const altPct = totalWinsBidType > 0 ? ((altWins / totalWinsBidType) * 100).toFixed(1) : '0.0';
+
+            html += '<div class="stats-section">';
+            html += '<h3 class="stats-section-title">Overall Main vs Alt Win Ratio</h3>';
+            if (totalWinsBidType === 0) {
+                html += '<p class="stats-empty">No auction records with bid type data available.</p>';
+            } else {
+                html += '<div class="player-profile-stats">';
+                html += `<div class="stat-card"><div class="stat-card-value main-color">${mainWins}</div><div class="stat-card-label">Main Wins (${mainPct}%)</div></div>`;
+                html += `<div class="stat-card"><div class="stat-card-value alt-color">${altWins}</div><div class="stat-card-label">Alt Wins (${altPct}%)</div></div>`;
+                html += `<div class="stat-card"><div class="stat-card-value">${totalWinsBidType}</div><div class="stat-card-label">Total Auctions</div></div>`;
+                html += '</div>';
+            }
+            html += '</div>';
+
+            html += '</div>';  // .stats-panel
+            container.innerHTML = html;
+        }
+
+        // ─── Global Helpers ───────────────────────────────────────────
+        // Helper to escape HTML (global)
+        function escHtml(str) {
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // Helper to create a clickable player link — used throughout the viewer
+        // so that ALL player names navigate to their profile (#player=<Name>)
+        function playerLink(name, extraClass) {
+            const cls = extraClass ? ` class="${extraClass}"` : '';
+            return `<a${cls} href="#player=${encodeURIComponent(name)}" onclick="event.preventDefault();navigate('player','${escHtml(name.replace(/'/g, "\\'"))}')">${escHtml(name)}</a>`;
+        }
+
+        /**
+         * Convert a UTC ISO 8601 timestamp to Pacific Time display string.
+         * Handles PST (UTC-8) and PDT (UTC-7) automatically.
+         * @param {string} utcTimestamp - ISO 8601 string ending in Z (e.g. "2026-05-11T02:18:56Z")
+         * @param {string} format - 'date' for YYYY-MM-DD, 'datetime' for YYYY-MM-DD HH:MM PT, 'time' for HH:MM PT
+         * @returns {string} Formatted Pacific Time string
+         */
+        function toPacific(utcTimestamp, format) {
+            if (!utcTimestamp) return 'Unknown';
+            try {
+                const d = new Date(utcTimestamp);
+                if (isNaN(d.getTime())) return utcTimestamp.slice(0, 10);
+                const opts = { timeZone: 'America/Los_Angeles' };
+                if (format === 'date') {
+                    const y = d.toLocaleString('en-CA', { ...opts, year: 'numeric' });
+                    const m = d.toLocaleString('en-CA', { ...opts, month: '2-digit' });
+                    const day = d.toLocaleString('en-CA', { ...opts, day: '2-digit' });
+                    return `${y}-${m}-${day}`;
+                } else if (format === 'time') {
+                    return d.toLocaleString('en-US', { ...opts, hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' });
+                } else {
+                    // 'datetime' — default
+                    const datePart = d.toLocaleString('en-CA', { ...opts, year: 'numeric', month: '2-digit', day: '2-digit' });
+                    const timePart = d.toLocaleString('en-US', { ...opts, hour: 'numeric', minute: '2-digit', hour12: true, timeZoneName: 'short' });
+                    return `${datePart} ${timePart}`;
+                }
+            } catch (e) {
+                return utcTimestamp.slice(0, 10);
+            }
+        }
+
+        function renderDropCards(records) {
+            const container = document.getElementById('drop-cards-container');
+            if (!container || !records || records.length === 0) return;
+
+            // Sort by timestamp descending (newest first / leftmost)
+            const sorted = [...records].sort((a, b) => {
+                const tA = a.timestamp || '';
+                const tB = b.timestamp || '';
+                return tB.localeCompare(tA);
+            });
+
+            // Local alias for escape helper
+            function esc(str) { return escHtml(str); }
+
+            // Helper to capitalize bid type
+            function formatBidType(bidType) {
+                if (!bidType) return '';
+                return bidType.charAt(0).toUpperCase() + bidType.slice(1);
+            }
+
+            // Build cards HTML
+            let cardsHtml = '<div class="drop-cards-row">';
+
+            for (const record of sorted) {
+                // Format date from ISO timestamp — convert to Pacific Time
+                const dateStr = toPacific(record.timestamp, 'datetime');
+
+                const winner = record.winner || 'Unknown';
+                const amount = record.amount != null ? record.amount : '?';
+
+                // Build bid list HTML
+                let bidsHtml = '';
+                if (record.bids && record.bids.length > 0) {
+                    bidsHtml = '<div class="drop-card-bids">';
+                    for (const bid of record.bids) {
+                        const isCorrection = bid.is_correction === true;
+                        const entryClass = isCorrection ? 'drop-card-bid-entry correction' : 'drop-card-bid-entry';
+                        const marker = isCorrection ? '<span class="correction-marker">*</span>' : '';
+                        const bidTypeStr = formatBidType(bid.bid_type);
+
+                        bidsHtml += `<div class="${entryClass}">${marker}${playerLink(bid.player)} <span class="bid-amount">${bid.amount}</span> <span class="bid-type">${bidTypeStr}</span></div>`;
+                    }
+                    bidsHtml += '</div>';
+                }
+
+                cardsHtml += `
+                    <div class="drop-card">
+                        <div class="drop-card-date">${dateStr}</div>
+                        <div class="drop-card-winner">${playerLink(winner)}</div>
+                        <div class="drop-card-amount">${amount} DKP</div>
+                        ${bidsHtml}
+                    </div>
+                `;
+            }
+
+            cardsHtml += '</div>';
+
+            // Add scroll hint if there are enough cards to scroll
+            if (sorted.length > 4) {
+                cardsHtml = '<div class="drop-card-scroll-hint">\u2190 scroll \u2192</div>' + cardsHtml;
+            }
+
+            container.innerHTML = cardsHtml;
+        }
+
+        // ─── Chart ─────────────────────────────────────────────────────
+        function drawTrendLine(containerId, points) {
+            const container = document.getElementById(containerId);
+            if (!container || !points || points.length < 2) return;
+
+            // Sort points chronologically
+            const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+
+            // Chart dimensions
+            const width = container.clientWidth || 600;
+            const height = 200;
+            const pad = { top: 20, right: 20, bottom: 40, left: 55 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            // Compute Y range with some padding
+            const amounts = sorted.map(p => p.amount);
+            let yMin = Math.min(...amounts);
+            let yMax = Math.max(...amounts);
+            if (yMin === yMax) { yMin -= 10; yMax += 10; }
+            const yPad = (yMax - yMin) * 0.1;
+            yMin = Math.floor(yMin - yPad);
+            yMax = Math.ceil(yMax + yPad);
+            if (yMin < 0) yMin = 0;
+
+            // Map data to pixel coordinates
+            function xPos(i) {
+                return pad.left + (sorted.length === 1 ? plotW / 2 : (i / (sorted.length - 1)) * plotW);
+            }
+            function yPos(val) {
+                return pad.top + plotH - ((val - yMin) / (yMax - yMin)) * plotH;
+            }
+
+            // Build polyline points string
+            const polyPoints = sorted.map((p, i) => `${xPos(i)},${yPos(p.amount)}`).join(' ');
+
+            // Build dot markers
+            const dots = sorted.map((p, i) =>
+                `<circle cx="${xPos(i)}" cy="${yPos(p.amount)}" r="4" fill="#ff79c6" stroke="#1a1a2e" stroke-width="1.5"/>`
+            ).join('');
+
+            // Y-axis labels (4-5 ticks)
+            const yTicks = 4;
+            let yLabels = '';
+            let yGridLines = '';
+            for (let t = 0; t <= yTicks; t++) {
+                const val = yMin + (t / yTicks) * (yMax - yMin);
+                const y = yPos(val);
+                yLabels += `<text x="${pad.left - 8}" y="${y + 4}" text-anchor="end" fill="#888" font-size="11">${Math.round(val)}</text>`;
+                yGridLines += `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#333" stroke-width="0.5"/>`;
+            }
+
+            // X-axis labels (show all dates if <=6, otherwise pick evenly spaced)
+            let xLabels = '';
+            const maxXLabels = 6;
+            const step = sorted.length <= maxXLabels ? 1 : Math.ceil(sorted.length / maxXLabels);
+            for (let i = 0; i < sorted.length; i += step) {
+                const x = xPos(i);
+                // Format date as MM-DD for brevity
+                const dateParts = sorted[i].date.split('-');
+                const label = dateParts.length >= 3 ? `${dateParts[1]}-${dateParts[2]}` : sorted[i].date;
+                xLabels += `<text x="${x}" y="${height - 8}" text-anchor="middle" fill="#888" font-size="11">${label}</text>`;
+            }
+            // Always show last label if not already shown
+            const lastIdx = sorted.length - 1;
+            if (lastIdx % step !== 0) {
+                const x = xPos(lastIdx);
+                const dateParts = sorted[lastIdx].date.split('-');
+                const label = dateParts.length >= 3 ? `${dateParts[1]}-${dateParts[2]}` : sorted[lastIdx].date;
+                xLabels += `<text x="${x}" y="${height - 8}" text-anchor="middle" fill="#888" font-size="11">${label}</text>`;
+            }
+
+            // Assemble SVG
+            const svg = `
+                <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+                    ${yGridLines}
+                    <line x1="${pad.left}" y1="${pad.top}" x2="${pad.left}" y2="${pad.top + plotH}" stroke="#555" stroke-width="1"/>
+                    <line x1="${pad.left}" y1="${pad.top + plotH}" x2="${width - pad.right}" y2="${pad.top + plotH}" stroke="#555" stroke-width="1"/>
+                    <polyline points="${polyPoints}" fill="none" stroke="#00d4ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                    ${dots}
+                    ${yLabels}
+                    ${xLabels}
+                </svg>
+            `;
+
+            container.innerHTML = `<h3 style="color:#888; font-size:0.9rem; margin:16px 0 8px 0;">Price Trend <span style="font-weight:normal; font-size:0.8rem;">(Pacific Time)</span></h3>` + svg;
+        }
+
+        // ─── SHA-256 Dedup (mirrors dkp_logger.py) ─────────────────────
+
+        /**
+         * Compute a hex SHA-256 digest of a string using the Web Crypto API.
+         * @param {string} str - The input string to hash
+         * @returns {Promise<string>} Hex digest
+         */
+        async function sha256Hex(str) {
+            const data = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        /**
+         * Derive a deterministic Raid Session ID from the log file text.
+         * Extracts the YYYY-MM-DD date from the first EQ timestamp found,
+         * then returns the SHA-256 hex digest of that date string.
+         * Falls back to the current UTC date if no timestamp is found.
+         *
+         * Mirrors Python: dkp_logger._raid_session_id()
+         *
+         * @param {string} text - Full text content of an EQ log file
+         * @returns {Promise<string>} SHA-256 hex digest of the date string
+         */
+        async function computeRaidSessionId(text) {
+            const months = { Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+                             Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12' };
+            // Match EQ timestamp: [Day Mon DD HH:MM:SS YYYY]
+            const tsPattern = /\[(\w{3}) (\w{3}) +(\d{1,2}) \d{2}:\d{2}:\d{2} (\d{4})\]/;
+            const lines = text.split(/\r?\n/);
+            for (const line of lines) {
+                const m = tsPattern.exec(line);
+                if (m) {
+                    const month = months[m[2]];
+                    const day = m[3].padStart(2, '0');
+                    const year = m[4];
+                    if (month) {
+                        const dateStr = `${year}-${month}-${day}`;
+                        return await sha256Hex(dateStr);
+                    }
+                }
+            }
+            // Fallback: current UTC date
+            const now = new Date();
+            const y = now.getUTCFullYear();
+            const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const d = String(now.getUTCDate()).padStart(2, '0');
+            const dateStr = `${y}-${mo}-${d}`;
+            return await sha256Hex(dateStr);
+        }
+
+        /**
+         * Compute a dedup key for an auction record.
+         * SHA-256 of null-byte-separated fields: item_name + \x00 + winner + \x00 + amount + \x00 + raidSessionId
+         *
+         * Mirrors Python: dkp_logger._dedup_key()
+         *
+         * @param {string} itemName - The item name
+         * @param {string} winner - The winning player name
+         * @param {number|string} amount - The winning bid amount
+         * @param {string} raidSessionId - The raid session ID hex string
+         * @returns {Promise<string>} SHA-256 hex digest (dedup key)
+         */
+        async function computeDedupKey(itemName, winner, amount, raidSessionId) {
+            const raw = `${itemName}\x00${winner}\x00${String(amount)}\x00${raidSessionId}`;
+            return await sha256Hex(raw);
+        }
+
+        // ─── Import / Export ───────────────────────────────────────────
+        // DEDUP INVARIANT: Importing the same log file twice produces no
+        // duplicates because computeRaidSessionId() is deterministic (same
+        // file text → same first timestamp → same YYYY-MM-DD → same SHA-256)
+        // and computeDedupKey() uses the same null-byte-separated format as
+        // Python's dkp_logger._dedup_key(). The existingKeys set merges both
+        // loaded records' dedup_keys and Store.importedKeys, so all previously
+        // seen keys are checked before any record is added.
+        // exportJSON() further deduplicates by dedup_key before serialising.
+        function importLog() {
+            // Create a hidden file input and trigger the native file picker
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt';
+            input.style.display = 'none';
+            document.body.appendChild(input);
+
+            input.addEventListener('change', async () => {
+                const file = input.files[0];
+                if (!file) {
+                    document.body.removeChild(input);
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    const text = e.target.result;
+
+                    // Parse the log file to get auction records
+                    const parsed = parseLogFile(text);
+
+                    // Compute raid session ID from the file text
+                    const raidSessionId = await computeRaidSessionId(text);
+
+                    // Build a set of existing dedup keys for fast lookup
+                    const existingKeys = new Set(
+                        Store.records
+                            .filter(r => r.dedup_key)
+                            .map(r => r.dedup_key)
+                    );
+                    // Also include previously imported keys
+                    for (const k of Store.importedKeys) {
+                        existingKeys.add(k);
+                    }
+
+                    let added = 0;
+                    let skipped = 0;
+
+                    for (const record of parsed) {
+                        // Compute dedup key for this record
+                        const dedupKey = await computeDedupKey(
+                            record.item_name,
+                            record.winner,
+                            record.amount,
+                            raidSessionId
+                        );
+
+                        if (existingKeys.has(dedupKey)) {
+                            skipped++;
+                        } else {
+                            // Add the record with dedup metadata
+                            record.raid_session_id = raidSessionId;
+                            record.dedup_key = dedupKey;
+                            record.log_source = file.name;
+                            Store.records.push(record);
+                            Store.importedKeys.add(dedupKey);
+                            existingKeys.add(dedupKey);
+                            added++;
+                        }
+                    }
+
+                    // Show import results notification
+                    showImportNotification(added, skipped);
+
+                    // Enable the Export button when imported records exist
+                    if (Store.importedKeys.size > 0) {
+                        document.getElementById('btn-export').disabled = false;
+                    }
+
+                    // Re-render the current view to reflect new data
+                    handleRoute();
+
+                    // Clean up the file input
+                    document.body.removeChild(input);
+                };
+
+                reader.onerror = () => {
+                    showImportNotification(0, 0, 'Error reading file');
+                    document.body.removeChild(input);
+                };
+
+                reader.readAsText(file);
+            });
+
+            // Trigger the file picker
+            input.click();
+        }
+
+        /**
+         * Show a temporary notification banner with import results.
+         * @param {number} added - Number of records added
+         * @param {number} skipped - Number of duplicates skipped
+         * @param {string} [errorMsg] - Optional error message
+         */
+        function showImportNotification(added, skipped, errorMsg) {
+            // Remove any existing notification
+            const existing = document.getElementById('import-notification');
+            if (existing) existing.remove();
+
+            const banner = document.createElement('div');
+            banner.id = 'import-notification';
+            banner.style.cssText = `
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                padding: 14px 20px;
+                border-radius: 6px;
+                font-size: 0.95rem;
+                z-index: 1000;
+                transition: opacity 0.3s;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            `;
+
+            if (errorMsg) {
+                banner.style.background = '#3d1a1a';
+                banner.style.border = '1px solid #e74c3c';
+                banner.style.color = '#ff6b6b';
+                banner.textContent = errorMsg;
+            } else {
+                banner.style.background = '#1a3d2a';
+                banner.style.border = '1px solid #50fa7b';
+                banner.style.color = '#50fa7b';
+                banner.textContent = `Imported: ${added} added, ${skipped} skipped`;
+            }
+
+            document.body.appendChild(banner);
+
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                banner.style.opacity = '0';
+                setTimeout(() => banner.remove(), 300);
+            }, 5000);
+        }
+
+        function exportJSON() {
+            if (Store.records.length === 0) return;
+
+            // Deduplicate by dedup_key, keeping first occurrence
+            const seen = new Set();
+            const deduped = [];
+            for (const rec of Store.records) {
+                if (rec.dedup_key && seen.has(rec.dedup_key)) continue;
+                if (rec.dedup_key) seen.add(rec.dedup_key);
+                deduped.push(rec);
+            }
+
+            const data = { version: 1, records: deduped };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dkp_history.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ─── Init ──────────────────────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+        });
+    </script>
+</body>
+</html>
