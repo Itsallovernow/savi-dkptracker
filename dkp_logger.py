@@ -51,7 +51,7 @@ def _raid_session_id(log_file_path):
             pass
 
     # Fallback: current UTC date
-    date_str = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    date_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
     return hashlib.sha256(date_str.encode('utf-8')).hexdigest()
 
 
@@ -153,7 +153,7 @@ def record_auction(
     # Use the auction close timestamp for session ID (not the first log line)
     # This ensures all officers produce the same session ID for the same auction
     # regardless of when their log file started.
-    ts = timestamp if timestamp else datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    ts = timestamp if timestamp else datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     session_id = _raid_session_id_from_timestamp(ts)
     key        = _dedup_key(item_name, winner, amount, session_id)
     lock_path  = history_file + ".lock"

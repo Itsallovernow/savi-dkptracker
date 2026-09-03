@@ -223,27 +223,30 @@ class TestDedupCrossOfficer(unittest.TestCase):
         self.assertEqual(key1, key2)
 
     def test_different_raids_different_keys(self):
-        """Different raid dates produce different session IDs and dedup keys."""
-        log_day1 = os.path.join(self.tmpdir, "log_day1.txt")
-        log_day2 = os.path.join(self.tmpdir, "log_day2.txt")
-        with open(log_day1, 'w', encoding='utf-8') as f:
-            f.write("[Mon Apr 28 21:00:00 2026] Zone entered.\n")
-        with open(log_day2, 'w', encoding='utf-8') as f:
-            f.write("[Tue Apr 29 21:00:00 2026] Zone entered.\n")
+        """Different raid dates produce different session IDs and dedup keys.
 
-        session1 = dkp_logger._raid_session_id(log_day1)
-        session2 = dkp_logger._raid_session_id(log_day2)
+        Session ID is derived from the auction close timestamp (the gratss
+        line), not the log file's first line — this ensures all officers
+        produce the same session ID for the same auction regardless of when
+        their individual log files started. So the raid distinction here is
+        driven by the `timestamp` argument.
+        """
+        ts_day1 = "2026-04-28T21:23:00Z"
+        ts_day2 = "2026-04-29T21:23:00Z"
+
+        session1 = dkp_logger._raid_session_id_from_timestamp(ts_day1)
+        session2 = dkp_logger._raid_session_id_from_timestamp(ts_day2)
         self.assertNotEqual(session1, session2)
 
         # Same item/winner/amount but different raids → both written
         history = [("Player", 100, "main", False)]
         result1 = dkp_logger.record_auction(
             "Sword", "Player", 100, history,
-            log_file_path=log_day1, history_file=self.history_file,
+            history_file=self.history_file, timestamp=ts_day1,
         )
         result2 = dkp_logger.record_auction(
             "Sword", "Player", 100, history,
-            log_file_path=log_day2, history_file=self.history_file,
+            history_file=self.history_file, timestamp=ts_day2,
         )
 
         self.assertTrue(result1)
