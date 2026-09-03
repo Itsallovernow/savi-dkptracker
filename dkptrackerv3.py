@@ -17,7 +17,7 @@ except ImportError:
     _HAS_MSVCRT = False
 
 # Version
-__version__ = "3.0.20"
+__version__ = "3.0.22"
 
 # Ensure emoji/unicode prints correctly on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -311,12 +311,86 @@ class ItemValidator:
     def items(self):
         return self.seed_items
 
+    def _is_learnable(self, item: str) -> bool:
+        """
+        Strict gate for adding an item to the seed supplement.
+
+        items.zip is a complete dump from the server, so a legitimate item is
+        almost always already in the DB. We only learn genuinely new-looking
+        item names and reject anything that smells like chat, a parse line,
+        a player name, or a bid/roll artifact. Prevents seed pollution.
+        """
+        s = item.strip()
+
+        # Empty or already known to the DB — nothing to learn
+        if not s or self.in_db(s):
+            return False
+
+        # Reuse the conversational-noise filter (contractions, chat words, etc.)
+        if is_chat_noise(s):
+            return False
+
+        # Reject control/link characters and punctuation that never appears
+        # in a clean item name
+        if any(ch in s for ch in ('\x12', '@', ':', ';', '>', '<', '=', '%', '\\', '`')):
+            return False
+
+        # Reject any digits — real item names are alphabetic; numbers here are
+        # bid amounts, roll ranges, quantities, or parse figures glued on
+        if any(ch.isdigit() for ch in s):
+            return False
+
+        # Reject bid/roll artifacts
+        if re.search(r'/ran\b|\bx\d+\b|\balt\b|\bmain\b', s, re.IGNORECASE):
+            return False
+
+        # Reject spell/heal/status prefixes
+        if re.match(r'^(spell|song|ch|ce|coh|mana|hp|health)\b', s, re.IGNORECASE):
+            return False
+
+        # Must contain at least one capitalised word (proper noun) — item names
+        # always do; lowercase chat phrases don't
+        words = [w for w in s.split() if w]
+        if not any(w[0].isupper() for w in words):
+            return False
+
+        # Sanity bounds on length
+        if len(s) < 3 or len(words) > 7:
+            return False
+
+        # Reject ALL-CAPS shouts (ZEALTAG, SKIP, JAZA) — item names are
+        # title-cased, not screaming
+        if s.isupper():
+            return False
+
+        # Single-word candidates are almost never real items (real drops are
+        # multi-word: "Cloak of Flames", "Klandicar's Talisman"). A lone word
+        # not in the DB is overwhelmingly a player name or chat token, so
+        # require at least two words for a brand-new learn.
+        if len(words) < 2:
+            return False
+
+        # Reject if it starts with a known chat/command verb even when
+        # multi-word (e.g. "Get in discord", "Consent Jaza", "PST Clarity")
+        if re.match(
+            r'^(get|consent|pst|inc|need|pass|congrats|grats|invite|tell|'
+            r'roll|ready|check|pull|camp|clear|loot|bank|trade)\b',
+            s, re.IGNORECASE,
+        ):
+            return False
+
+        return True
+
     def save_new_item(self, item):
-        """Add an item to the seed supplement (not the DB)."""
+        """Add an item to the seed supplement (not the DB), if it passes the
+        strict learnability gate. Returns True if learned, False if rejected."""
+        if not self._is_learnable(item):
+            return False
         self.seed_items.add(item)
         with open(SEED_FILE_WRITE, "a", encoding="utf-8") as f:
             f.write(item + "\n")
         print(f"🆕 Learned new item: {item}")
+        return True
 
     def in_db(self, item):
         """Check if an item exists in the game database (not seed)."""
