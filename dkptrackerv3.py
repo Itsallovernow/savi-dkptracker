@@ -17,7 +17,7 @@ except ImportError:
     _HAS_MSVCRT = False
 
 # Version
-__version__ = "3.0.22"
+__version__ = "3.0.24"
 
 # Ensure emoji/unicode prints correctly on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -74,9 +74,12 @@ CLEAR_PATTERN = re.compile(
     r")",
     re.IGNORECASE,
 )
+# Auction announcements list multiple items separated by either '|' or ','.
+# The quoted content must contain at least one delimiter so that single-item
+# bid lines (e.g. 'Cloak of Flames 500') still fall through to bid parsing.
 AUCTION_ANNOUNCE_PATTERN = re.compile(
     r"\[.*?\] (?:.*? tells the raid,|You tell your raid,|.*? tells the guild,|You say to your guild,)"
-    r"\s+'(.+\|.+)'",
+    r"\s+'(.+[|,].+)'",
     re.IGNORECASE,
 )
 QTY_PATTERN = re.compile(r'^(.+?)\s*\((\d+)\)\s*$')
@@ -216,6 +219,14 @@ def _parse_bid_fields(item: str, amount: str, alt_group) -> tuple:
 
     # Strip any x<N> multiplier glued to the amount (e.g. '500x2' -> '500')
     amount = re.sub(r'\s*x\d+\s*$', '', amount.strip(), flags=re.IGNORECASE)
+
+    # Clean the item name of trailing/leading junk that can leak in from
+    # malformed lines (e.g. a comma-separated announce misread as a bid leaves
+    # 'Blackstone Maul ('). Strip a trailing quantity marker '(N)' first, then
+    # any dangling brackets/punctuation/whitespace at the ends. Internal
+    # apostrophes and hyphens (Klandicar's, Wurm-scale) are preserved.
+    item = re.sub(r'\s*\(\s*\d*\s*\)?\s*$', '', item).strip()   # trailing '(2)' or dangling '('
+    item = item.strip(" \t([{-–—,.")                              # leading/trailing junk chars
 
     return item, amount, is_alt
 
@@ -1098,7 +1109,10 @@ def process_line(line, tracker, roll_tracker, player_name):
     # --- auction announcement ---
     am = AUCTION_ANNOUNCE_PATTERN.search(line)
     if am:
-        clean = [it.strip() for it in am.group(1).split('|') if it.strip()]
+        body = am.group(1)
+        # Prefer pipe delimiter; fall back to comma for comma-separated lists.
+        delimiter = '|' if '|' in body else ','
+        clean = [it.strip() for it in body.split(delimiter) if it.strip()]
         if clean:
             tracker.announce_items(clean)
         return 'announce'
