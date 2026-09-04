@@ -4,7 +4,7 @@ inclusion: manual
 
 # Build EXE — PyInstaller Build for dkp_client
 
-When the user says "build the exe" or "build exe", execute these steps from the project root (`c:\Users\Bennie\Downloads\bidtracker`):
+When the user says "build the exe" or "build exe", execute these steps from the repository root:
 
 ## Step 1: Kill any running instance
 

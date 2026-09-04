@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Security: API Key Rotation Reminder",
+      "trigger": "SessionStart",
+      "description": "On session start, if SECURITY_TODO.md exists, remind the agent/user that the leaked guild API key still needs rotating. Self-silences once SECURITY_TODO.md is deleted.",
+      "action": {
+        "type": "command",
+        "command": "test -f SECURITY_TODO.md && cat SECURITY_TODO.md || true"
+      }
+    }
+  ]
+}

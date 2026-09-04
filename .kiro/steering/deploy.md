@@ -4,7 +4,7 @@ inclusion: manual
 
 # Deploy — Full Stack Deployment
 
-When the user says "deploy" or "deploy!", execute these steps in order from the project root (`c:\Users\Bennie\Downloads\bidtracker`):
+When the user says "deploy" or "deploy!", execute these steps in order from the repository root:
 
 ## Step 0: Ensure AWS Login
 

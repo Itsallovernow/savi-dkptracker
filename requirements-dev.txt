@@ -1,0 +1,16 @@
+# Development + client dependencies for the DKP Bid Tracker.
+# Backend (AWS Lambda) dependencies are declared separately in backend/requirements.txt.
+#
+#   python -m venv .venv && source .venv/bin/activate   # (Windows: .venv\Scripts\activate)
+#   pip install -r requirements-dev.txt
+
+# --- Client runtime ---
+rapidfuzz>=3.0        # fuzzy item-name matching in the bid parser
+requests>=2.31        # cloud sync HTTP client
+
+# --- Testing ---
+pytest>=8.0
+hypothesis>=6.0       # property-based tests
+
+# --- Packaging (Windows .exe build) ---
+pyinstaller>=6.0

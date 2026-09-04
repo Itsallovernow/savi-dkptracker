@@ -45,3 +45,4 @@ test_output.txt
 
 # Credentials / local config
 client_config.ini
+dkp_client.ini

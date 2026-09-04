@@ -1,9 +1,10 @@
 [server]
 # Your guild's API endpoint (from sam deploy output)
-api_url = https://czfat794tl.execute-api.us-west-1.amazonaws.com/prod
+api_url = https://<your-api-id>.execute-api.<region>.amazonaws.com/prod
 
 # Shared guild API key (the ApiKeyValue you set during sam deploy)
-api_key = zIQJVpqzYfpzXXccjHjTib8LDqiN0t09zV8YQ6fCfJemKDb9SVTsS9fhxYRnl8VcqANJU3DSFPwaAg6HH9dPAIbybhAK6WH4g5xXs6X8EdnsHQrQE4GyBY8B4Z230jYluFGEKoHGPiMFZUARUCnybe1Tiai3jlyqmiBnBl0yT8CXmvhcslAagfg8Csx7hHGbGPhyyOTE4PgjMMibiegUVi6nNQbg23FJAjP4Pt0EXwBmBmLwenrQbIWWZjdCF1LN
+# Do NOT commit the real value — copy this file to dkp_client.ini and fill it in locally.
+api_key = your-guild-secret-key-here
 
 [client]
 # Path to the EverQuest log directory on this officer's machine
