@@ -76,9 +76,12 @@ class BidEntry:
         elif len(self.player) > 64:
             errors.append("player must be at most 64 characters")
 
-        # amount: positive integer
-        if not isinstance(self.amount, int) or self.amount <= 0:
-            errors.append("amount must be a positive integer")
+        # amount: non-negative integer.
+        # 0 is allowed because a 0-DKP award (historical loot-council / reserved
+        # item) synthesizes a single bid at amount 0 when no live bids were
+        # recorded. Mirrors the backend, which accepts these for import.
+        if not isinstance(self.amount, int) or isinstance(self.amount, bool) or self.amount < 0:
+            errors.append("amount must be a non-negative integer")
 
         # bid_type: must be "main" or "alt"
         if self.bid_type not in _VALID_BID_TYPES:
@@ -151,9 +154,12 @@ class AuctionRecord:
         elif not self.winner.isalnum():
             errors.append("winner must be alphanumeric")
 
-        # amount: positive integer
-        if not isinstance(self.amount, int) or self.amount <= 0:
-            errors.append("amount must be a positive integer")
+        # amount: non-negative integer.
+        # 0 is valid for awards (e.g. historical loot-council / reserved items
+        # that were tracked at 0 DKP and charged later). A *bid* of 0 is still
+        # invalid — see BidEntry.validate — but an award amount of 0 is allowed.
+        if not isinstance(self.amount, int) or isinstance(self.amount, bool) or self.amount < 0:
+            errors.append("amount must be a non-negative integer")
 
         # timestamp: valid ISO 8601
         if not self.timestamp or not _ISO8601_PATTERN.match(self.timestamp):

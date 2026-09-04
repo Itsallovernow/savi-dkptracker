@@ -147,10 +147,13 @@ class TestAuctionRecordValidation:
         errors = _validate_auction_record(record)
         assert any("amount" in e for e in errors)
 
-    def test_zero_amount_rejected(self):
+    def test_zero_amount_accepted(self):
+        # A 0-DKP award is valid — historical loot-council / reserved items
+        # were tracked at 0 and charged later. The backend must still accept
+        # these so old history files can be imported.
         record = {**VALID_RECORD, "amount": 0}
         errors = _validate_auction_record(record)
-        assert any("amount" in e for e in errors)
+        assert not any("amount" in e for e in errors)
 
     def test_invalid_timestamp_rejected(self):
         record = {**VALID_RECORD, "timestamp": "not-a-date"}
@@ -219,7 +222,9 @@ class TestHandlePostAuctions:
     @patch("handler.boto3")
     def test_new_record_returns_201(self, mock_boto3):
         mock_table = MagicMock()
-        mock_table.get_item.return_value = {}  # No existing item
+        # Dedup check uses table.query — return no matching items so the
+        # record is treated as new.
+        mock_table.query.return_value = {"Items": []}
         mock_boto3.resource.return_value.Table.return_value = mock_table
 
         event = _make_event(body=VALID_RECORD)
@@ -234,7 +239,9 @@ class TestHandlePostAuctions:
     @patch("handler.boto3")
     def test_duplicate_record_returns_200(self, mock_boto3):
         mock_table = MagicMock()
-        mock_table.get_item.return_value = {"Item": VALID_RECORD}  # Already exists
+        # Dedup check uses table.query — return the existing record so the
+        # request is treated as a duplicate.
+        mock_table.query.return_value = {"Items": [VALID_RECORD]}
         mock_boto3.resource.return_value.Table.return_value = mock_table
 
         event = _make_event(body=VALID_RECORD)

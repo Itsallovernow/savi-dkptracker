@@ -44,10 +44,12 @@ class TestBidEntry:
         errors = bid.validate()
         assert any("player" in e and "64" in e for e in errors)
 
-    def test_zero_amount(self):
+    def test_zero_amount_accepted(self):
+        # A synthesized 0-amount bid backs a 0-DKP award (historical
+        # loot-council data), so it must not raise an amount error.
         bid = BidEntry(player="Player", amount=0, bid_type="main", is_correction=False)
         errors = bid.validate()
-        assert any("amount" in e for e in errors)
+        assert not any("amount" in e for e in errors)
 
     def test_negative_amount(self):
         bid = BidEntry(player="Player", amount=-5, bid_type="main", is_correction=False)
@@ -142,11 +144,13 @@ class TestAuctionRecord:
         errors = record.validate()
         assert any("alphanumeric" in e for e in errors)
 
-    def test_zero_amount(self):
+    def test_zero_amount_accepted(self):
+        # 0 is a valid award amount (historical loot-council / reserved items
+        # tracked at 0 DKP and charged later). Must not raise an amount error.
         record = _valid_record()
         record.amount = 0
         errors = record.validate()
-        assert any("amount" in e for e in errors)
+        assert not any("amount" in e for e in errors)
 
     def test_negative_amount(self):
         record = _valid_record()
