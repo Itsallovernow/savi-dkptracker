@@ -17,7 +17,7 @@ except ImportError:
     _HAS_MSVCRT = False
 
 # Version
-__version__ = "3.0.24"
+__version__ = "3.0.25"
 
 # Ensure emoji/unicode prints correctly on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -785,8 +785,13 @@ class BidTracker:
             self.bid_order.append(target)
         if snap['qty'] > 1:
             self.item_quantities[target] = snap['qty']
-            # Increment remaining since we're undoing one award
-            self.item_remaining[target]  = snap['remaining'] + 1
+            # Undo exactly one award: increment the CURRENT remaining count.
+            # Using the live value (defaulting to 0 if the item was fully
+            # awarded and removed) rather than the snapshot's stale 'remaining'
+            # avoids double-counting when multiple copies were closed in
+            # sequence before an ungratss arrives.
+            current_remaining = self.item_remaining.get(target, 0)
+            self.item_remaining[target] = current_remaining + 1
         # Restore last bid timer (reset to now since auction is reopened)
         self._last_bid_time[target] = time.time()
         # Restore announcement clock if it was cleared
