@@ -17,7 +17,7 @@ except ImportError:
     _HAS_MSVCRT = False
 
 # Version
-__version__ = "3.0.26"
+__version__ = "3.0.29"
 
 # Ensure emoji/unicode prints correctly on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -78,12 +78,14 @@ CLEAR_PATTERN = re.compile(
     r")",
     re.IGNORECASE,
 )
-# Auction announcements list multiple items separated by either '|' or ','.
-# The quoted content must contain at least one delimiter so that single-item
-# bid lines (e.g. 'Cloak of Flames 500') still fall through to bid parsing.
+# Auction announcements list multiple items separated by '|' (pipe).
+# Pipe-only by policy: comma-separated matching pulled in ordinary chat as
+# bogus multi-item announcements, so announcements must use pipes. The quoted
+# content must contain at least one '|' so single-item bid lines
+# (e.g. 'Cloak of Flames 500') still fall through to bid parsing.
 AUCTION_ANNOUNCE_PATTERN = re.compile(
     r"\[.*?\] (?:.*? tells the raid,|You tell your raid,|.*? tells the guild,|You say to your guild,)"
-    r"\s+'(.+[|,].+)'",
+    r"\s+'(.+\|.+)'",
     re.IGNORECASE,
 )
 QTY_PATTERN = re.compile(r'^(.+?)\s*\((\d+)\)\s*$')
@@ -177,6 +179,8 @@ def is_chat_noise(item: str) -> bool:
     """
     Return True if the item name looks like conversational text rather than
     an EQ item name. Checks:
+      - Contains a comma or semicolon (list/close punctuation never in a real
+        item name; announcements use pipes, so a comma here means chat)
       - Contains the word 'skip' (placeholder / skip vote)
       - Contains '@' (raid callout marker, never in item names)
       - More than 7 words (real items are short)
@@ -184,6 +188,10 @@ def is_chat_noise(item: str) -> bool:
         NOTE: possessives like Borannin's are NOT contractions and are allowed.
       - Contains common conversational words that never appear in item names
     """
+    # EQ item names contain no commas or semicolons. A comma here is chat
+    # (e.g. 'grats Bob, nice, 200') and a semicolon is a close-message remnant.
+    if ',' in item or ';' in item:
+        return True
     if re.search(r'\bskip\b', item, re.IGNORECASE):
         return True
     if '@' in item:
@@ -230,7 +238,7 @@ def _parse_bid_fields(item: str, amount: str, alt_group) -> tuple:
     # any dangling brackets/punctuation/whitespace at the ends. Internal
     # apostrophes and hyphens (Klandicar's, Wurm-scale) are preserved.
     item = re.sub(r'\s*\(\s*\d*\s*\)?\s*$', '', item).strip()   # trailing '(2)' or dangling '('
-    item = item.strip(" \t([{-–—,.")                              # leading/trailing junk chars
+    item = item.strip(" \t([{-–—,.;")                             # leading/trailing junk chars
 
     return item, amount, is_alt
 
@@ -689,6 +697,21 @@ class BidTracker:
                 self._last_bid_time.pop(item, None)
                 self._print_above_table(*_sold_lines(copy_label + " [all copies awarded]"))
             else:
+                # A copy was awarded but copies remain. Remove the winner's
+                # bid so they don't carry over as the leader on the next copy
+                # (e.g. a lone bidder on a qty-2 item shouldn't stay "leading"
+                # the second copy after winning the first). Other bidders'
+                # bids remain; if the winner was the only bidder, the remaining
+                # copy now shows with no bids.
+                self.bids_by_item[item]['main'].pop(winner, None)
+                self.bids_by_item[item]['alt'].pop(winner, None)
+                if item in self._max_bids:
+                    self._max_bids[item].pop(winner, None)
+                # Prune the winner's entries from the visible history too, so
+                # the remaining copy's bid list reflects only live contenders.
+                self.bids_by_item[item]['history'] = [
+                    h for h in self.bids_by_item[item]['history'] if h[0] != winner
+                ]
                 self._print_above_table(
                     *_sold_lines(f"{copy_label} [{new_remaining} cop{'y' if new_remaining == 1 else 'ies'} remaining]")
                 )
@@ -1119,9 +1142,9 @@ def process_line(line, tracker, roll_tracker, player_name):
     am = AUCTION_ANNOUNCE_PATTERN.search(line)
     if am:
         body = am.group(1)
-        # Prefer pipe delimiter; fall back to comma for comma-separated lists.
-        delimiter = '|' if '|' in body else ','
-        clean = [it.strip() for it in body.split(delimiter) if it.strip()]
+        # Pipe-delimited only. Commas are treated as ordinary chat, not a
+        # multi-item announcement delimiter.
+        clean = [it.strip() for it in body.split('|') if it.strip()]
         if clean:
             tracker.announce_items(clean)
         return 'announce'
