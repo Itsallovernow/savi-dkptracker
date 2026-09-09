@@ -17,7 +17,7 @@ except ImportError:
     _HAS_MSVCRT = False
 
 # Version
-__version__ = "3.0.25"
+__version__ = "3.0.26"
 
 # Ensure emoji/unicode prints correctly on Windows consoles
 if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
@@ -56,6 +56,10 @@ ROLL_RESULT_PATTERN = re.compile(r"\*\*It could have been any number from 0 to (
 ROLL_CALL_PATTERN   = re.compile(r"(.+?) (\d{1,4})/(\d{1,4})")
 GRATSS_PATTERN      = re.compile(r"^(.+?);\s*(\d+);\s*(.+?)\s+gratss\b", re.IGNORECASE)
 UNGRATSS_PATTERN    = re.compile(r"^(.+?);\s*(\d+);\s*(.+?)\s+ungratss\b", re.IGNORECASE)
+# Structural shape of a close message: 'item;amount;player <word>'. Used to
+# reject close messages whose trailing keyword is mistyped (e.g. 'gratszsx',
+# 'grats') so they never fall through to bid parsing and create a bogus item.
+CLOSE_SHAPE_PATTERN = re.compile(r"^.+?;\s*\d+;\s*\S+", re.IGNORECASE)
 # Retraction: player says they meant a different (lower) amount
 # e.g. "sorry - meant 460", "oops meant 460", "err meant 460"
 RETRACTION_PATTERN  = re.compile(
@@ -1151,6 +1155,17 @@ def process_line(line, tracker, roll_tracker, player_name):
         ts = _extract_log_timestamp(line)
         tracker.close_item(item, winner, amount, timestamp=ts)
         return 'gratss'
+
+    # --- malformed close: 'item;amount;player <mistyped-word>' ---
+    # A valid gratss/ungratss was not matched above, but the line still has the
+    # structural shape of a close message (two semicolons: item;amount;player).
+    # This is almost always a typo of the close keyword ('gratszsx', 'grats').
+    # Reject it so it never becomes a bogus bid on 'item;'.
+    if CLOSE_SHAPE_PATTERN.match(inner):
+        tracker._print_above_table(
+            f"⚠️  Ignored malformed close (check spelling of 'gratss'): {DIM}{inner}{RESET}"
+        )
+        return None
 
     # --- priority roll call ---
     if roll_tracker.parse_roll_call(line):
